@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
-import java.util.Scanner;
 
 public class SudokuSolver {
     String srcFile = "problem.txt";
@@ -13,6 +12,8 @@ public class SudokuSolver {
     int[][] initArr;
     boolean[][] fixed;
     private int n;
+    private Random r;
+
 
     public void readTheProblem() {
 //        System.out.println("Enter your the problem file (default is problem.txt): ");
@@ -22,29 +23,129 @@ public class SudokuSolver {
 //            this.srcFile = filename;
 //        }
 //        System.out.println("Your problem is :" + this.srcFile);
+        r = new Random(System.currentTimeMillis());
         readTheArray(this.srcFile);
-        System.out.println(getTheCosts());
+        System.out.println("After random fill the sudoku:");
+        printArray(this.arr);
+        long run1 = System.currentTimeMillis();
+        solver();
+        System.out.println("It use "+(System.currentTimeMillis()-run1)+" ms to solve the problem.");
     }
 
-    private int getTheCosts() {
+    private void solver() {
+        int ini_t=4;
+
+        double t = ini_t;
+        double alpha = 0.8;
+        boolean reheat=true;
+
+        int cost_no_changed = 0;
+        int iter = 0;
+        while(getTheCosts(this.arr)!=0)
+        {
+            iter++;
+            if(iter%1000000==0)
+            {
+                System.out.println("iterations : "+iter+".................");
+            }
+            int cost_prv = getTheCosts(this.arr);
+            if(reheat)
+            {
+                t=ini_t;
+                reheat=false;
+            }else
+            {
+                t=alpha*t;
+            }
+            randomAndSwap(t);
+            int cost_after = getTheCosts(this.arr);
+            if(cost_after==cost_prv)
+            {
+                cost_no_changed++;
+                if(cost_no_changed==2000)
+                {
+//                    System.out.println("reheat");
+                    this.arr = cloneArray(this.initArr);
+                    randomFill();
+                    cost_no_changed=0;
+                    reheat = true;
+                }
+            }
+        }
+//        for(int i = 0 ; i < 20;i++) {
+//            printArray(this.arr);
+//
+//            System.out.println(getTheCosts(this.arr));
+//            randomAndSwap(4);
+//            System.out.println(getTheCosts(this.arr));
+//            printArray(this.arr);
+//
+//            System.out.println("=============================");
+//        }
+        System.out.println("The result is :");
+        printArray(this.arr);
+
+    }
+
+    private void randomAndSwap(double t_s) {
+        int rand_i=getRandomNumberInRange(0,n*n-1);
+        int rand_j=getRandomNumberInRange(0,n*n-1);
+
+        // if the random chosen element is fixed, choose another one.
+        while(this.fixed[rand_i][rand_j])
+        {
+             rand_i=getRandomNumberInRange(0,n*n-1);
+             rand_j=getRandomNumberInRange(0,n*n-1);
+        }
+
+        int square_i = rand_i/n;
+        int square_j = rand_j/n;
+        int suffle_i = getRandomNumberInRange(square_i*n,(square_i+1)*n-1);
+        int suffle_j = getRandomNumberInRange(square_j*n,(square_j+1)*n-1);
+
+        //if the suffle element is equal to random element or the suffle element is fixed
+        //choose another one
+        while(this.arr[rand_i][rand_j]==this.arr[suffle_i][suffle_j]||this.fixed[suffle_i][suffle_j])
+        {
+             suffle_i = getRandomNumberInRange(square_i*n,(square_i+1)*n-1);
+             suffle_j = getRandomNumberInRange(square_j*n,(square_j+1)*n-1);
+        }
+
+        int[][] copyArr = cloneArray(this.arr);
+        int t = copyArr[rand_i][rand_j];
+        copyArr[rand_i][rand_j]=copyArr[suffle_i][suffle_j];
+        copyArr[suffle_i][suffle_j]=t;
+
+//        Random r = new Random(System.currentTimeMillis());
+        double mySample = r.nextDouble();
+        double prob = Math.exp(-Math.abs(getTheCosts(this.arr)-getTheCosts(copyArr))/t_s);
+//        System.out.println(mySample+"  "+prob);
+        if(getTheCosts(this.arr)>getTheCosts(copyArr)||mySample<prob)
+        {
+            this.arr = copyArr;
+        }
+
+    }
+
+    private int getTheCosts(int[][] arr) {
         int cost = 0;
         for (int i = 0; i < rows; i++) {
             ArrayList<Integer> rowsInfo = new ArrayList<>();
             for (int j = 0; j < column; j++) {
-                if (!rowsInfo.contains(this.arr[i][j])) {
-                    rowsInfo.add(this.arr[i][j]);
+                if (!rowsInfo.contains(arr[i][j])) {
+                    rowsInfo.add(arr[i][j]);
                 }
             }
             cost += n * n - rowsInfo.size();
 
         }
 
-        System.out.println("\r\n---------------------------\r\n");
+//        System.out.println("\r\n---------------------------\r\n");
         for (int i = 0; i < column; i++) {
             ArrayList<Integer> colInfo = new ArrayList<>();
             for (int j = 0; j < rows; j++) {
-                if (!colInfo.contains(this.arr[j][i])) {
-                    colInfo.add(this.arr[j][i]);
+                if (!colInfo.contains(arr[j][i])) {
+                    colInfo.add(arr[j][i]);
                 }
             }
             cost += n * n - colInfo.size();
@@ -87,14 +188,14 @@ public class SudokuSolver {
                 i++;
             }
 
-            printArray(this.arr);
+//            printArray(this.arr);
             this.initArr=cloneArray(this.arr);
             randomFill();
-            printArray(this.arr);
-            this.arr = cloneArray(initArr);
-            randomFill();
-            printArray(this.arr);
-            printArray(initArr);
+//            printArray(this.arr);
+//            this.arr = cloneArray(initArr);
+//            randomFill();
+//            printArray(this.arr);
+//            printArray(initArr);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -141,7 +242,6 @@ public class SudokuSolver {
         ArrayList<Integer> ai = new ArrayList<>(allNumber);
         int result;
         if (ai.size() != 1) {
-
             result = ai.get(getRandomNumberInRange(0, ai.size() - 1));
         } else {
             result = ai.get(0);
@@ -180,7 +280,6 @@ public class SudokuSolver {
             throw new IllegalArgumentException("max must be greater than min");
         }
 
-        Random r = new Random();
         return r.nextInt((max - min) + 1) + min;
     }
 
