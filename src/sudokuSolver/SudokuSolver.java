@@ -129,7 +129,7 @@ public class SudokuSolver {
         }
 
         int result = getRandomNumberInRange(1, this.n);
-        if (alreadyContains.size() < 3) {
+        if (alreadyContains.size() < 4) {
             while (alreadyContains.contains(result)) {
                 result = getRandomNumberInRange(1, this.n);
             }
