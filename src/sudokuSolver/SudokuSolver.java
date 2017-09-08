@@ -2,6 +2,7 @@ package sudokuSolver;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -9,49 +10,44 @@ public class SudokuSolver {
     String srcFile = "problem.txt";
     int column = -1, rows;
     int[][] arr;
+    int[][] initArr;
     boolean[][] fixed;
     private int n;
 
     public void readTheProblem() {
-        System.out.println("Enter your the problem file (default is problem.txt): ");
-        Scanner scanner = new Scanner(System.in);
-        String filename = scanner.nextLine();
-        if (!filename.equals("")) {
-            this.srcFile = filename;
-        }
-        System.out.println("Your problem is :" + this.srcFile);
+//        System.out.println("Enter your the problem file (default is problem.txt): ");
+//        Scanner scanner = new Scanner(System.in);
+//        String filename = scanner.nextLine();
+//        if (!filename.equals("")) {
+//            this.srcFile = filename;
+//        }
+//        System.out.println("Your problem is :" + this.srcFile);
         readTheArray(this.srcFile);
         System.out.println(getTheCosts());
     }
 
     private int getTheCosts() {
         int cost = 0;
-        for(int i =0;i<rows;i++)
-        {
+        for (int i = 0; i < rows; i++) {
             ArrayList<Integer> rowsInfo = new ArrayList<>();
-            for(int j = 0; j<column;j++)
-            {
-                if(!rowsInfo.contains(this.arr[i][j]))
-                {
+            for (int j = 0; j < column; j++) {
+                if (!rowsInfo.contains(this.arr[i][j])) {
                     rowsInfo.add(this.arr[i][j]);
                 }
             }
-            cost+=n*n-rowsInfo.size();
+            cost += n * n - rowsInfo.size();
 
         }
 
         System.out.println("\r\n---------------------------\r\n");
-        for(int i =0;i<column;i++)
-        {
+        for (int i = 0; i < column; i++) {
             ArrayList<Integer> colInfo = new ArrayList<>();
-            for(int j = 0; j<rows;j++)
-            {
-                if(!colInfo.contains(this.arr[j][i]))
-                {
+            for (int j = 0; j < rows; j++) {
+                if (!colInfo.contains(this.arr[j][i])) {
                     colInfo.add(this.arr[j][i]);
                 }
             }
-            cost+=n*n-colInfo.size();
+            cost += n * n - colInfo.size();
 
         }
 
@@ -92,8 +88,13 @@ public class SudokuSolver {
             }
 
             printArray(this.arr);
+            this.initArr=cloneArray(this.arr);
             randomFill();
             printArray(this.arr);
+            this.arr = cloneArray(initArr);
+            randomFill();
+            printArray(this.arr);
+            printArray(initArr);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -116,7 +117,12 @@ public class SudokuSolver {
     }
 
     private int getRandomNumberInSquaure(int square_i, int square_j) {
-        ArrayList<Integer> alreadyContains = new ArrayList<>();
+        HashSet<Integer> alreadyContains = new HashSet<>();
+        HashSet<Integer> allNumber = new HashSet<>();
+
+        for (int i = 1; i <= n * n; i++) {
+            allNumber.add(i);
+        }
 //        System.out.println(square_i + " " + square_j);
         for (int i = square_i * n; i < (square_i + 1) * n; i++) {
             for (int j = square_j * n; j < (square_j + 1) * n; j++) {
@@ -128,19 +134,31 @@ public class SudokuSolver {
 //            System.out.print("\n");
         }
 
-        int result = getRandomNumberInRange(1, this.n);
-        if (alreadyContains.size() < 4) {
-            while (alreadyContains.contains(result)) {
-                result = getRandomNumberInRange(1, this.n);
-            }
-            return result;
-        } else {
-            for (int i = 1; i <= n * n; i++) {
-                if (!alreadyContains.contains(i)) {
-                    return i;
-                }
-            }
+        for (int i : alreadyContains) {
+            allNumber.remove(i);
         }
+
+        ArrayList<Integer> ai = new ArrayList<>(allNumber);
+        int result;
+        if (ai.size() != 1) {
+
+            result = ai.get(getRandomNumberInRange(0, ai.size() - 1));
+        } else {
+            result = ai.get(0);
+        }
+//        int result = getRandomNumberInRange(1, this.n);
+//        if (alreadyContains.size() < 4) {
+//            while (alreadyContains.contains(result)) {
+//                result = getRandomNumberInRange(1, this.n);
+//            }
+//            return result;
+//        } else {
+//            for (int i = 1; i <= n * n; i++) {
+//                if (!alreadyContains.contains(i)) {
+//                    return i;
+//                }
+//            }
+//        }
 
         return result;
     }
@@ -164,5 +182,14 @@ public class SudokuSolver {
 
         Random r = new Random();
         return r.nextInt((max - min) + 1) + min;
+    }
+
+    public int[][] cloneArray(int[][] src) {
+        int length = src.length;
+        int[][] target = new int[length][src[0].length];
+        for (int i = 0; i < length; i++) {
+            System.arraycopy(src[i], 0, target[i], 0, src[i].length);
+        }
+        return target;
     }
 }
