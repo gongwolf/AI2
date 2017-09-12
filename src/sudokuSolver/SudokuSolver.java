@@ -20,10 +20,17 @@ public class SudokuSolver {
         System.out.println("Enter your the problem file (default is problem.txt): ");
         Scanner scanner = new Scanner(System.in);
         String filename = scanner.nextLine();
+<<<<<<< HEAD
         if (!filename.equals("")){
             this.srcFile = filename;
         }
         System.out.println("Your problem is :" + this.srcFile);
+=======
+        if (!filename.equals("")) {
+            this.srcFile = filename;
+        }
+        System.out.println("Your problem file is :" + this.srcFile);
+>>>>>>> 60bb9717b1b1fecb23198101743d35fd0351d478
         r = new Random(System.currentTimeMillis());
         readTheArray(this.srcFile);
         System.out.println("After random fill the sudoku:");
@@ -83,6 +90,7 @@ public class SudokuSolver {
 //
 //            System.out.println("=============================");
 //        }
+        System.out.println("iterations : "+iter+".................");
         System.out.println("The result is :");
         printArray(this.arr);
 
