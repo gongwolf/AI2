@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Scanner;
 
 public class SudokuSolver {
     String srcFile = "problem.txt";
@@ -16,13 +17,13 @@ public class SudokuSolver {
 
 
     public void readTheProblem() {
-//        System.out.println("Enter your the problem file (default is problem.txt): ");
-//        Scanner scanner = new Scanner(System.in);
-//        String filename = scanner.nextLine();
-//        if (!filename.equals("")) {
-//            this.srcFile = filename;
-//        }
-//        System.out.println("Your problem is :" + this.srcFile);
+        System.out.println("Enter your the problem file (default is problem.txt): ");
+        Scanner scanner = new Scanner(System.in);
+        String filename = scanner.nextLine();
+        if (!filename.equals("")){
+            this.srcFile = filename;
+        }
+        System.out.println("Your problem is :" + this.srcFile);
         r = new Random(System.currentTimeMillis());
         readTheArray(this.srcFile);
         System.out.println("After random fill the sudoku:");
@@ -36,7 +37,7 @@ public class SudokuSolver {
         int ini_t=4;
 
         double t = ini_t;
-        double alpha = 0.8;
+        double alpha = 0.9;
         boolean reheat=true;
 
         int cost_no_changed = 0;

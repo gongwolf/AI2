@@ -11,6 +11,4 @@ public class test {
         SudokuSolver s = new SudokuSolver();
         s.readTheProblem();
     }
-
-
 }

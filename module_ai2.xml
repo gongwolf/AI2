@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_ai2" default="compile.module.ai2">
+  <dirname property="module.ai2.basedir" file="${ant.file.module_ai2}"/>
+  
+  <property name="module.jdk.home.ai2" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.ai2" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.ai2" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.ai2" value="-encoding UTF-8 -source 1.8 -target 1.8 ${compiler.args}"/>
+  
+  <property name="ai2.output.dir" value="${module.ai2.basedir}/out/production/AI2"/>
+  <property name="ai2.testoutput.dir" value="${module.ai2.basedir}/out/test/AI2"/>
+  
+  <path id="ai2.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="ai2.module.production.classpath">
+    <path refid="${module.jdk.classpath.ai2}"/>
+  </path>
+  
+  <path id="ai2.runtime.production.module.classpath">
+    <pathelement location="${ai2.output.dir}"/>
+  </path>
+  
+  <path id="ai2.module.classpath">
+    <path refid="${module.jdk.classpath.ai2}"/>
+    <pathelement location="${ai2.output.dir}"/>
+  </path>
+  
+  <path id="ai2.runtime.module.classpath">
+    <pathelement location="${ai2.testoutput.dir}"/>
+    <pathelement location="${ai2.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.ai2">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.ai2">
+    <patternset refid="excluded.from.module.ai2"/>
+  </patternset>
+  
+  <path id="ai2.module.sourcepath">
+    <dirset dir="${module.ai2.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.ai2" depends="compile.module.ai2.production,compile.module.ai2.tests" description="Compile module AI2"/>
+  
+  <target name="compile.module.ai2.production" depends="register.custom.compilers" description="Compile module AI2; production classes">
+    <mkdir dir="${ai2.output.dir}"/>
+    <javac2 destdir="${ai2.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.ai2}/javac">
+      <compilerarg line="${compiler.args.ai2}"/>
+      <bootclasspath refid="ai2.module.bootclasspath"/>
+      <classpath refid="ai2.module.production.classpath"/>
+      <src refid="ai2.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.ai2"/>
+    </javac2>
+    
+    <copy todir="${ai2.output.dir}">
+      <fileset dir="${module.ai2.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.ai2.tests" depends="register.custom.compilers,compile.module.ai2.production" description="compile module AI2; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.ai2" description="cleanup module">
+    <delete dir="${ai2.output.dir}"/>
+    <delete dir="${ai2.testoutput.dir}"/>
+  </target>
+</project>
